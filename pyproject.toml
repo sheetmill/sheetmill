@@ -1,0 +1,71 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "sheetmill"
+dynamic = ["version"]
+description = "Installs the sheetmill packages for working with Excel files in pure Python."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Ethan Post" }]
+requires-python = ">=3.11"
+dependencies = ["xlformat>=0.1,<1"]
+keywords = ["excel", "xlsx", "openpyxl", "spreadsheet"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Topic :: Office/Business :: Financial :: Spreadsheet",
+]
+
+[project.urls]
+Homepage = "https://github.com/sheetmill/sheetmill"
+Source = "https://github.com/sheetmill/sheetmill"
+Changelog = "https://github.com/sheetmill/sheetmill/blob/main/CHANGELOG.md"
+Issues = "https://github.com/sheetmill/sheetmill/issues"
+
+[dependency-groups]
+dev = [
+  "ruff>=0.8",
+  "mypy>=1.13",
+]
+
+[tool.hatch.version]
+path = "src/sheetmill/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/sheetmill"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/sheetmill", "README.md", "CHANGELOG.md", "LICENSE"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src"]
+extend-exclude = ["*.md"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "C4", "SIM", "RUF", "D", "ANN", "PT", "N", "PERF"]
+ignore = ["D105", "D107", "D203", "D213", "ANN401"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_unreachable = true
+packages = ["sheetmill"]
+mypy_path = "src"
