@@ -12,4 +12,4 @@ output. A formula engine, in development, will be added when it is released. Thi
 contains no code of its own.
 """
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
