@@ -1,6 +1,8 @@
-# Release: push a tag vX.Y.Z on main. The workflow runs CI, checks that the tag matches the
-# package version, builds once, publishes to TestPyPI, installs that release from TestPyPI
-# and imports it with the packages it pulls in, then publishes the same files to PyPI.
+# Release: `gh release create vX.Y.Z --target main` creates the tag on GitHub and starts this
+# workflow; the tag must match `__version__`. The workflow runs CI, checks the tag against the
+# package version, builds once, publishes to TestPyPI, installs that release from TestPyPI with
+# the packages it names and renders a small workbook with sheetpeek, then publishes the same
+# files to PyPI.
 #
 # Publishing uses trusted publishing (OpenID Connect), so no token is stored. Configure on
 # test.pypi.org and pypi.org a trusted publisher for owner `sheetmill`, repository
@@ -58,17 +60,34 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: astral-sh/setup-uv@v5
-      - name: Install the release from TestPyPI and import it
+      - name: Install the release from TestPyPI and render a workbook
         run: |
           version="${GITHUB_REF_NAME#v}"
           uv venv /tmp/env
-          # sheetmill comes from TestPyPI; a dependency TestPyPI lacks comes from PyPI.
+          # Only sheetmill itself is taken from TestPyPI; the packages it installs, as its own
+          # metadata declares them, come from PyPI.
           # TestPyPI's index can lag the upload by a minute.
           for attempt in 1 2 3 4 5 6; do
-            uv pip install -p /tmp/env --no-cache --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ "sheetmill==${version}" && break
+            uv pip install -p /tmp/env --no-cache --no-deps --index-url https://test.pypi.org/simple/ "sheetmill==${version}" && break
             sleep 20
           done
-          /tmp/env/bin/python -I -c "import sheetmill, xlformat; assert sheetmill.__version__ == '${version}'; print(xlformat.format_value(1234.5, '#,##0.00'))"
+          /tmp/env/bin/python -I -c "from importlib.metadata import requires; print('\n'.join(r for r in requires('sheetmill') if 'extra ==' not in r))" > /tmp/requirements.txt
+          cat /tmp/requirements.txt
+          uv pip install -p /tmp/env -r /tmp/requirements.txt
+          SHEETMILL_VERSION="${version}" /tmp/env/bin/python -I - <<'PY'
+          import os, pathlib, tempfile
+          import openpyxl, sheetmill, sheetpeek, xlformat
+          assert sheetmill.__version__ == os.environ["SHEETMILL_VERSION"]
+          assert xlformat.format_value(1234.5, "#,##0.00") == "1,234.50"
+          path = pathlib.Path(tempfile.mkdtemp()) / "check.xlsx"
+          wb = openpyxl.Workbook()
+          wb.active["A1"] = 1234.5
+          wb.active["A1"].number_format = "#,##0.00"
+          wb.save(path)
+          text = sheetpeek.render(path, "text")
+          assert text == "1,234.50\n", repr(text)
+          print(sheetmill.__version__, xlformat.__version__, sheetpeek.__version__, text, end="")
+          PY
 
   pypi:
     needs: verify-testpypi

@@ -7,17 +7,23 @@ files. It contains no code of its own; each package is imported under its own na
 pip install sheetmill
 ```
 
-Today that installs one package:
+That installs two packages:
 
 - [xlformat](https://github.com/sheetmill/xlformat): applies Excel number formats to values and
   returns the text Excel displays ([PyPI](https://pypi.org/project/xlformat/),
   [documentation](https://xlformat.readthedocs.io)).
+- [sheetpeek](https://github.com/sheetmill/sheetpeek): renders workbooks as HTML, Markdown and
+  terminal text, showing what Excel shows ([PyPI](https://pypi.org/project/sheetpeek/),
+  [documentation](https://sheetpeek.readthedocs.io)).
 
-Two more will be added as they are released:
+For sheetpeek's styled terminal output, which uses [rich](https://pypi.org/project/rich/),
+install the `rich` extra:
 
-- [sheetpeek](https://github.com/sheetmill/sheetpeek): renders workbooks to HTML, Markdown and
-  terminal output.
-- [xlformula](https://github.com/sheetmill/xlformula): evaluates Excel formulas.
+```bash
+pip install "sheetmill[rich]"
+```
+
+A formula engine, in development, will be added when it is released.
 
 Each package also installs and works on its own.
 

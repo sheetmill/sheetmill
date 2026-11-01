@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `sheetpeek` (0.1 or later within 0.x), which renders workbooks as HTML, Markdown and
+  terminal text.
+- The `rich` extra: `pip install "sheetmill[rich]"` installs `sheetpeek[rich]` for styled
+  terminal output.
+
+### Changed
+- `xlformat` 0.2 or later within 0.x is required (was 0.1), the version sheetpeek needs.
+
 ## [0.1.0] - 2026-10-27
 
 ### Added

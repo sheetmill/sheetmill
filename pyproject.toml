@@ -11,7 +11,10 @@ license = "MIT"
 license-files = ["LICENSE"]
 authors = [{ name = "Ethan Post" }]
 requires-python = ">=3.11"
-dependencies = ["xlformat>=0.1,<1"]
+dependencies = [
+  "xlformat>=0.2,<1",
+  "sheetpeek>=0.1,<1",
+]
 keywords = ["excel", "xlsx", "openpyxl", "spreadsheet"]
 classifiers = [
   "Development Status :: 3 - Alpha",
@@ -25,6 +28,10 @@ classifiers = [
   "Programming Language :: Python :: 3.14",
   "Topic :: Office/Business :: Financial :: Spreadsheet",
 ]
+
+[project.optional-dependencies]
+# Styled terminal output from sheetpeek.
+rich = ["sheetpeek[rich]"]
 
 [project.urls]
 Homepage = "https://github.com/sheetmill/sheetmill"

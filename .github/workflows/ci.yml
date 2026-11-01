@@ -29,12 +29,19 @@ jobs:
       - uses: astral-sh/setup-uv@v5
       - run: uv build
       - run: uvx twine check --strict dist/*
-      # The wheel must install alone and pull in the packages it names.
+      # The wheel must install alone and pull in the packages it names, with and without the
+      # rich extra.
       - name: Install the wheel into a clean environment
         run: |
           uv venv /tmp/wheel-env
           uv pip install -p /tmp/wheel-env dist/*.whl
-          /tmp/wheel-env/bin/python -I -c "import sheetmill, xlformat; print(sheetmill.__version__, xlformat.__version__)"
+          /tmp/wheel-env/bin/python -I -c "import sheetmill, xlformat, sheetpeek; print(sheetmill.__version__, xlformat.__version__, sheetpeek.__version__)"
+      - name: Install the wheel with the rich extra into a clean environment
+        run: |
+          uv venv /tmp/rich-env
+          wheel=$(ls dist/*.whl)
+          uv pip install -p /tmp/rich-env "${wheel}[rich]"
+          /tmp/rich-env/bin/python -I -c "import sheetmill, xlformat, sheetpeek, rich; print(sheetmill.__version__, xlformat.__version__, sheetpeek.__version__)"
       - uses: actions/upload-artifact@v4
         with:
           name: dist
