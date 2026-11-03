@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `xlrecalc` (0.1 or later within 0.x), which recalculates Excel workbooks in pure Python and
+  writes the results back as cached values.
+
 ## [0.2.0] - 2026-10-31
 
 ### Added
