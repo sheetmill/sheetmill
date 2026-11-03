@@ -13,4 +13,4 @@ Installing ``sheetmill`` installs:
 output. This package contains no code of its own.
 """
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
