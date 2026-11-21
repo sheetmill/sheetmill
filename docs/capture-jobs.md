@@ -60,7 +60,7 @@ not updated.
 |---|---|
 | `schema` | the format version: 1 |
 | `job_id`, `package`, `purpose` | names; `purpose` is one line of plain text |
-| `requires` | optional: `excel_build_min` (the job is refused on an older Excel) and `edition` (the Office edition the job was written for, such as `Microsoft 365`; recorded, not checked) |
+| `requires` | optional: `excel_build_min` (the job is refused on an older Excel) and `edition`, one of `Microsoft 365`, `Office 2024`, `Office LTSC 2024`, `Office 2021`, `Office LTSC 2021` and `Office 2019` (the job is refused on any other edition, and on a machine whose edition is not known) |
 | `limits` | `job_seconds` (default 3,600) and `step_seconds` (default 600); a step past its limit is a hang, recorded and never retried |
 | `workbooks` | run in order; each opens one file (or makes a new workbook) and runs its steps; every workbook is closed **without saving** at the end of its steps |
 | `on_refused_open` | `record` (default: note the refusal, go on) or `stop` |
@@ -72,6 +72,10 @@ A cell range is written as in Excel, with an optional sheet: `Sheet1!A1:C40`, `'
 columns `A:C`, rows `1:3`. Every step may carry an `id` (it names the step's result) and
 `seconds` (its own time limit).
 
+Version 1 of this page was corrected before any committed capture used it: `requires.edition`
+is now checked rather than only recorded, and the `app` operation's `build` is the full build.
+Manifests keep `"schema": 1`.
+
 ## Operations
 
 Excel is started fresh for each job, with macros disabled and alerts off, and quit at the end. In
@@ -82,7 +86,7 @@ the table, the Excel terms are those of Excel's object model on Windows (VBA); a
 |---|---|---|---|
 | `open` | `alerts`: true turns Excel's alerts (`DisplayAlerts`) on for this open only (default false); `via`: `com` (the default: through Excel's object model) or `shell`; `repair`: `refuse` or `person`; `message` and `expect` for the person forms, as for `person` | `Workbooks.Open` with links not updated. `via: shell` opens the file as a double-click does; `repair: person` lets a person answer Excel's repair dialog | the workbook's name, or **refused** when the open fails |
 | `new_workbook` | none | `Workbooks.Add` | the workbook's name |
-| `app` | `get`: `version`, `build`, `standard_font`, `standard_font_size`, `calculation` | reads Excel's application settings | the values |
+| `app` | `get`: `version`, `build`, `build_number`, `standard_font`, `standard_font_size`, `calculation` | reads Excel's application settings: `build` is the full build as Excel's About box shows it (such as `16.0.19000.20000`; on Windows read from Office's installation, since the object model gives only the version and the build number), `build_number` is `Application.Build` (such as `19000`; Excel for Mac has none, and a job asking for it there is refused) | the values |
 | `workbook` | `get`/`set`: `date1904`, `saved` | the workbook's date system and saved flag | the values |
 | `calculate` | `kind`: `normal`, `full`, `rebuild` | `Calculate`, `CalculateFull`, `CalculateFullRebuild` (Mac: `calculate`, `calculate full`, `calculate full rebuild`) | none |
 | `write` | `range` and one of `values` (rows of values), `formulas`, `formulas2` (rows of formula text), `paste_text` (lines) | sets `Value2`, `Formula` or `Formula2` (the dynamic-array form); `paste_text` pastes the lines as typed text through the clipboard | per cell, whether it took |
@@ -102,6 +106,15 @@ operation it uses. A job that uses an operation the machine's Excel lacks (on a 
 with `format: "html"`) is refused before Excel starts, with the operation named. The "Mac:"
 notes say how to repeat a step by hand in Excel for Mac; they do not mean that every operation
 has been run there.
+
+A job that names `requires.edition` runs only on a machine whose Excel is that edition, and is
+refused before Excel starts otherwise. The edition decides which functions Excel has, so a job
+whose results depend on a function names the edition it was written for. Office of a given year
+and Office LTSC of the same year are different editions. On Windows the edition is read from
+Office's installed products (`O365...` is Microsoft 365; a retail product of 2024, 2021 or 2019
+is Office of that year, a volume product of 2024 or 2021 Office LTSC of that year, and any other
+product of those years leaves the edition unknown); on a Mac it is part of the machine's
+configuration, as Excel > About Excel shows it. A job that names no edition runs on any.
 
 The window is **maximized** before any job that shows it (Excel's own `WindowState = xlMaximized`
 on Windows; Excel's `window state maximized` on the Mac), so a job does not size the window, and
@@ -153,13 +166,14 @@ record:
 |---|---|
 | `windows` or `macos` | the operating system's version and build, the architecture; the Windows edition, or the Mac's light or dark appearance |
 | `office` | on Windows, Office's version, its installed platform, the license product and the update channel |
-| `excel` | version and build, the operating system as Excel reports it, the calculation version, the standard font and size, the decimal and thousands separators and whether the system's are used, the international settings, and the process architecture |
+| `excel` | the version; the full build as Excel's About box shows it (`build`, text on both platforms, such as `16.0.19000.20000` on Windows or `16.115.26110837` on a Mac), and on Windows also Excel's own build number (`build_number`, such as `19000`); the update channel (on a Mac; on Windows it is in `office`), the operating system as Excel reports it, the calculation version, the standard font and size, the decimal and thousands separators and whether the system's are used, the international settings, and the process architecture |
+| `edition` | the machine's Excel edition (`found`, one of the editions above, or none when not known) and where it was read (`source`: `office products`, or `edition.txt`, the machine's configuration file) |
 | `display`, `geometry` | the screen's size in pixels and its DPI (on the Mac also its points and scale), and Excel's maximized window, each against the values expected for the machine (`geometry`: expected, found, ok) |
 | `locale` | the locale name, the separators, the short and long date and time formats, the code pages, the two-digit-year limit, the sort locale and its version |
 | `fonts` | each font face the captures use (Calibri, Aptos, Aptos Narrow, Aptos Display, Segoe UI): family, style, the version inside the font and whether it is one of Office's cloud fonts |
 | `theme` | Office's theme and the system's light or dark settings |
 | `printer` | the default printer's paper size and orientation, which set a PDF's pages |
-| `checks`, `audit` | the Excel build, the macro and DDE settings the job required, and the audit flag |
+| `checks`, `audit` | the macro and DDE settings the job required, and the audit flag |
 
 On Windows, the program that runs the job fetches Office's cloud fonts before the first workbook
 opens.
