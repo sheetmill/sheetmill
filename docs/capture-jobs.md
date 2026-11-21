@@ -60,7 +60,7 @@ not updated.
 |---|---|
 | `schema` | the format version: 1 |
 | `job_id`, `package`, `purpose` | names; `purpose` is one line of plain text |
-| `requires` | optional: `excel_build_min`, the minimum Excel build per platform, as an object with a `windows` entry, a `mac` entry or both (such as `{"windows": "16.0.19000.0", "mac": "16.115"}`), since each platform numbers its builds differently: a job with a minimum runs only on the platforms it names, and is refused when the machine's `excel.build` is older than that platform's entry (both are split at the dots and compared part by part as whole numbers, so the Windows build `16.0.19000.20000` meets a `windows` minimum of `16.0.19000.0` and not one of `16.0.19001.0`, and the Mac build `16.115.26110837` meets a `mac` minimum of `16.115` and not one of `16.116`); and `edition`, one of `Microsoft 365`, `Office 2024`, `Office LTSC 2024`, `Office 2021`, `Office LTSC 2021` and `Office 2019` (the job is refused on any other edition, and on a machine whose edition is not known) |
+| `requires` | optional: `excel_build_min`, the minimum Excel build per platform, as an object with a `windows` entry, a `macos` entry or both, the header's names for the operating systems (such as `{"windows": "16.0.19000.0", "macos": "16.115"}`; any other key is refused, and so is a plain string; see "Which machine can run a job"); and `edition`, one of `Microsoft 365`, `Office 2024`, `Office LTSC 2024`, `Office 2021`, `Office LTSC 2021` and `Office 2019` (the job is refused on any other edition, and on a machine whose edition is not known) |
 | `limits` | `job_seconds` (default 3,600) and `step_seconds` (default 600); a step past its limit is a hang, recorded and never retried |
 | `workbooks` | run in order; each opens one file (or makes a new workbook) and runs its steps; every workbook is closed **without saving** at the end of its steps |
 | `on_refused_open` | `record` (default: note the refusal, go on) or `stop` |
@@ -112,6 +112,14 @@ is Office of that year, a volume product of 2024 or 2021 is Office LTSC of that 
 other product of those years leaves the edition unknown); on a Mac it is part of the machine's
 configuration, as Excel > About Excel shows it. A job that names no edition runs on any.
 
+A job that names `requires.excel_build_min` runs only on the platforms it names: each platform
+numbers its builds differently, so a minimum is given per platform, never once for both. It is
+refused before Excel starts when the machine's `excel.build` is older than its platform's
+entry. Both are split at the dots and compared part by part as whole numbers, so the Windows
+build `16.0.19000.20000` meets a `windows` minimum of `16.0.19000.0` and not one of
+`16.0.19001.0`, and the Mac build `16.115.26110837` meets a `macos` minimum of `16.115` and not
+one of `16.116`. A job that names no minimum runs on either platform.
+
 The window is **maximized** before any job that shows it (Excel's own `WindowState = xlMaximized`
 on Windows; Excel's `window state maximized` on the Mac), so a job does not size the window, and
 the window's geometry is part of the machine's record (below).
@@ -162,7 +170,7 @@ record:
 |---|---|
 | `windows` or `macos` | the operating system's version and build, the architecture; the Windows edition, or the Mac's light or dark appearance |
 | `office` | on Windows, Office's version, its installed platform, the license product and the update channel |
-| `excel` | the version; the full build (`build`, text on both platforms: on Windows the version Office's installation reports, such as `16.0.19000.20000`; on a Mac Excel's bundle version, `CFBundleVersion`, which is the version and the build number joined by a dot, such as `16.115.26110837` for what Excel > About Excel shows as `16.115 (26110837)`), and on Windows also Excel's own build number (`build_number`, such as `19000`); the update channel (on a Mac; on Windows it is in `office`), the operating system as Excel reports it, the calculation version, the standard font and size, the decimal and thousands separators and whether the system's are used, the international settings, and the process architecture |
+| `excel` | the version; the full build (`build`, text on both platforms: on Windows the version Office's installation reports, such as `16.0.19000.20000`; on a Mac Excel's bundle version, `CFBundleVersion`, which is the version and the number About Excel shows in parentheses, joined by a dot, such as `16.115.26110837` for what Excel > About Excel shows as `16.115 (26110837)`), and on Windows also Excel's own build number (`build_number`, such as `19000`); the update channel (on a Mac; on Windows it is in `office`), the operating system as Excel reports it, the calculation version, the standard font and size, the decimal and thousands separators and whether the system's are used, the international settings, and the process architecture |
 | `edition` | the machine's Excel edition (`found`, one of the editions above, or none when not known) and where it was read (`source`: `office products`, or `edition.txt`, the machine's configuration file) |
 | `display`, `geometry` | the screen's size in pixels and its DPI (on the Mac also its points and scale), and Excel's maximized window, each against the values expected for the machine (`geometry`: expected, found, ok) |
 | `locale` | the locale name, the separators, the short and long date and time formats, the code pages, the two-digit-year limit, the sort locale and its version |
@@ -210,4 +218,5 @@ The manifest names inputs by file name only, and the generator recreates them; t
 - **1** (2026-11-21): the first version. Corrected the same day, before any committed capture
   used it, so that `requires.edition` is checked rather than only recorded, the `app`
   operation's `build` is the full build, and `requires.excel_build_min` gives one minimum per
-  platform; manifests keep `"schema": 1`.
+  platform, keyed `windows` and `macos` (a plain string is refused); manifests keep
+  `"schema": 1`.
