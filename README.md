@@ -28,6 +28,13 @@ pip install "sheetmill[rich]"
 
 Each package also installs and works on its own.
 
+## How results are checked
+
+Some of the packages' expected results are captured from Excel. The
+[capture job format](https://github.com/sheetmill/sheetmill/blob/main/docs/capture-jobs.md)
+describes the jobs that make those captures: the operations done to Excel, the results they
+give, and the machine record a capture keeps, so that anyone can repeat them.
+
 ## License
 
 MIT.
