@@ -60,7 +60,7 @@ not updated.
 |---|---|
 | `schema` | the format version: 1 |
 | `job_id`, `package`, `purpose` | names; `purpose` is one line of plain text |
-| `requires` | optional: `excel_build_min`, the minimum Excel build per platform, as an object with a `windows` entry, a `macos` entry or both, the header's names for the operating systems (such as `{"windows": "16.0.19000.0", "macos": "16.115"}`; any other key is refused, and so is a plain string; see "Which machine can run a job"); and `edition`, one of `Microsoft 365`, `Office 2024`, `Office LTSC 2024`, `Office 2021`, `Office LTSC 2021` and `Office 2019` (the job is refused on any other edition, and on a machine whose edition is not known) |
+| `requires` | optional: `excel_build_min`, the minimum Excel build per platform, as an object with a `windows` entry, a `macos` entry or both (such as `{"windows": "16.0.19000.0", "macos": "16.115"}`), keyed by the names a capture's header gives the operating systems (any other key is refused, and so is a plain string; see "Which machine can run a job"); and `edition`, one of `Microsoft 365`, `Office 2024`, `Office LTSC 2024`, `Office 2021`, `Office LTSC 2021` and `Office 2019` (the job is refused on any other edition, and on a machine whose edition is not known) |
 | `limits` | `job_seconds` (default 3,600) and `step_seconds` (default 600); a step past its limit is a hang, recorded and never retried |
 | `workbooks` | run in order; each opens one file (or makes a new workbook) and runs its steps; every workbook is closed **without saving** at the end of its steps |
 | `on_refused_open` | `record` (default: note the refusal, go on) or `stop` |
