@@ -120,6 +120,10 @@ build `16.0.19000.20000` meets a `windows` minimum of `16.0.19000.0` and not one
 `16.0.19001.0`, and the Mac build `16.115.26110837` meets a `macos` minimum of `16.115` and not
 one of `16.116`. A job that names no minimum runs on either platform.
 
+A job is also refused before Excel starts when the screen's size or DPI, or the machine's text
+smoothing, differs from the values expected for the machine (the header's `geometry` and
+`font_smoothing`), since either changes the pixels a window capture measures.
+
 The window is **maximized** before any job that shows it (Excel's own `WindowState = xlMaximized`
 on Windows; Excel's `window state maximized` on the Mac), so a job does not size the window, and
 the window's geometry is part of the machine's record (below).
@@ -173,8 +177,10 @@ record:
 | `excel` | the version; the full build (`build`, text on both platforms: on Windows the version Office's installation reports, such as `16.0.19000.20000`; on a Mac Excel's bundle version, `CFBundleVersion`, which is the version and the number About Excel shows in parentheses, joined by a dot, such as `16.115.26110837` for what Excel > About Excel shows as `16.115 (26110837)`), and on Windows also Excel's own build number (`build_number`, such as `19000`); the update channel (on a Mac; on Windows it is in `office`), the operating system as Excel reports it, the calculation version, the standard font and size, the decimal and thousands separators and whether the system's are used, the international settings, and the process architecture |
 | `edition` | the machine's Excel edition (`found`, one of the editions above, or none when not known) and where it was read (`source`: `office products`, or `edition.txt`, the machine's configuration file) |
 | `display`, `geometry` | the screen's size in pixels and its DPI (on the Mac also its points and scale), and Excel's maximized window, each against the values expected for the machine (`geometry`: expected, found, ok) |
+| `font_smoothing` | how the machine smooths text, against the values expected for the machine (`expected`, `found`, `ok`; every value `expected` names must be found as it is). On Windows: whether smoothing is on, its type (`cleartype` or `standard`), its contrast, its subpixel order (`rgb` or `bgr`) and the ClearType tuning set per display (`directwrite`, empty when none is set); on a Mac: the `AppleFontSmoothing` setting (none when it is not set). Absent from headers written before the field existed |
 | `locale` | the locale name, the separators, the short and long date and time formats, the code pages, the two-digit-year limit, the sort locale and its version |
-| `fonts` | each font face the captures use (Calibri, Aptos, Aptos Narrow, Aptos Display, Segoe UI): family, style, the version inside the font and whether it is one of Office's cloud fonts |
+| `fonts` | on Windows, the font files of each face the job uses: the faces its workbooks name (cell fonts, the Normal style's, the theme's major and minor fonts, rich-text runs), Excel's standard font (the font a text file or a new workbook takes) and Calibri, Aptos, Aptos Narrow, Aptos Display and Segoe UI. For each face, every file the machine loads for that family (installed, or one of Office's cloud fonts), with its family, style, version and revision as the file states them, and whether it is a cloud font. Not recorded on a Mac |
+| `fonts_missing` | optional, on Windows: the faces the job's workbooks name for which the machine has no font file (an empty list when none is missing). Text in such a face is not drawn in that face, so a measurement of it does not describe the named face. Absent from headers written before the field existed |
 | `theme` | Office's theme and the system's light or dark settings |
 | `printer` | the default printer's paper size and orientation, which set a PDF's pages |
 | `checks`, `audit` | the macro and DDE settings the job required, and the audit flag |
@@ -219,4 +225,7 @@ The manifest names inputs by file name only, and the generator recreates them; t
   used it, so that `requires.edition` is checked rather than only recorded, the `app`
   operation's `build` is the full build, and `requires.excel_build_min` gives one minimum per
   platform, keyed `windows` and `macos` (a plain string is refused); manifests keep
-  `"schema": 1`.
+  `"schema": 1`. Extended on 2026-11-23 without changing manifests: the header's `fonts`
+  lists every face the job uses, a new `fonts_missing` field lists the faces with no font file,
+  and a new `font_smoothing` field is checked before every job. Headers written before then lack
+  these fields.
