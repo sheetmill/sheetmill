@@ -227,5 +227,6 @@ The manifest names inputs by file name only, and the generator recreates them; t
   platform, keyed `windows` and `macos` (a plain string is refused); manifests keep
   `"schema": 1`. Extended on 2026-11-23 without changing manifests: the header's `fonts`
   lists every face the job uses, a new `fonts_missing` field lists the faces with no font file,
-  and a new `font_smoothing` field is checked before every job. Headers written before then lack
-  these fields.
+  and a new `font_smoothing` field is checked before every job; the page also states from then
+  that a job is refused when the screen's size or DPI differs from the values expected for the
+  machine. Headers written before then lack the new fields.
