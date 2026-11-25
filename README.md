@@ -35,6 +35,11 @@ Some of the packages' expected results are captured from Excel. The
 describes the jobs that make those captures: the operations done to Excel, the results they
 give, and the machine record a capture keeps, so that anyone can repeat them.
 
+## Security
+
+To report a security problem, see
+[SECURITY.md](https://github.com/sheetmill/sheetmill/blob/main/SECURITY.md).
+
 ## License
 
 MIT.
