@@ -13,7 +13,8 @@ happens (a crash, a hang, memory use, output that is not escaped, a limit that d
 
 sheetmill is in alpha. Fixes go into the next release; only the latest release receives fixes. Here that is the
 latest release of sheetmill itself, which contains no code of its own: a problem in a package it installs (xlformat,
-sheetpeek or xlrecalc) belongs in that package's repository, reported there the same way.
+sheetpeek or xlrecalc, or xlio, the reader sheetpeek and xlrecalc share) belongs in that package's repository,
+reported there the same way.
 
 ## What happens after a report
 
